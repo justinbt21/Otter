@@ -3,7 +3,8 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 from functions import agg_metrics
-from constants import metrics, food_types, calc_metrics
+from constants import food_types, metrics
+from wordcloud import WordCloud
 
 st.set_page_config(layout="centered")
 # Read DataFrame
@@ -18,7 +19,6 @@ topn_input = st.sidebar.slider('Top Items Selector', min_value=0, max_value=50, 
 #min_rating = st.sidebar.radio('Min Rating (TEST)', pd.Series([0,1,2,3,4,5]), horizontal=True)
 #max_order_issue_rate = st.sidebar.slider('Max Order Issue Rate (TEST)', 0.0, 1.0, 1.0, .1)
 exclude_cuisine = st.sidebar.multiselect('Exclude specific cuisine tags', df['tags'].drop_duplicates())
-
 
 # Data Tranformations
 df = df.loc[~df.tags.isin(exclude_cuisine)]
@@ -52,11 +52,7 @@ st.plotly_chart(px.bar(dow_df, x=food_types[type_toggle], y=metrics[metrics_togg
                                food_types[type_toggle]: type_toggle}
                        )
                 )
-
-st.dataframe(agg_metrics(dow_df_prep, food_types[type_toggle])
-             .sort_values(by=metrics[metrics_toggle], ascending=False).reset_index(drop=True)
-             )
-
+# Dropdown Table to see per cuisine, what food items are selling
 if type_toggle == 'Cuisine Type':
     with st.expander('Click here to deep dive into cuisines'):
         cuisine_list = dow_df[food_types[type_toggle]].drop_duplicates()
@@ -66,6 +62,12 @@ if type_toggle == 'Cuisine Type':
             agg_metrics(dow_df_prep.loc[mask], 'item_type_new') \
                 .sort_values(by=metrics[metrics_toggle], ascending=False).reset_index(drop=True)
             )
+
+st.dataframe(agg_metrics(dow_df_prep, food_types[type_toggle])
+             .sort_values(by=metrics[metrics_toggle], ascending=False).reset_index(drop=True)
+             )
+
+
 
 # Time of Day Data
 st.header(f'Time of Day - Trending {type_toggle}')
@@ -98,8 +100,6 @@ st.write(px.bar(fig_hr_df, x=food_types[type_toggle], y=metrics[metrics_toggle],
                         food_types[type_toggle]: type_toggle},
                 )
          )
-
-st.dataframe(fig_hr_df)
 if type_toggle == 'Cuisine Type':
     with st.expander('Click here to deep dive into cuisines'):
         cuisine_list = order_hour_df[food_types[type_toggle]].drop_duplicates()
@@ -108,24 +108,33 @@ if type_toggle == 'Cuisine Type':
         st.dataframe(agg_metrics(order_hour_prep.loc[mask], 'item_type_new') \
                      .sort_values(by=metrics[metrics_toggle], ascending=False).reset_index(drop=True)
                      )
+st.dataframe(fig_hr_df)
 
+with st.expander('Appendix'):
+    subfig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig1 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
+                            , x='dayofweek', y=['promo_order_rate', 'first_time_order_rate'])
+    fig2 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
+                            , x='dayofweek', y=['requested_orders'])
+    fig2.update_traces(yaxis="y2", line_color='red')
+    subfig.add_traces(fig1.data + fig2.data)
+    subfig.layout.xaxis.title = "Day of Week"
+    subfig.layout.yaxis.title = "Rate"
+    subfig.layout.yaxis2.title = "Orders"
+    subfig.update_layout(title='Requested Orders relative to Promo Orders')
+    st.plotly_chart(subfig)
 
+    breakfast_df = agg_metrics(df.loc[(df.hour >= 5) & (df.hour < 11)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()
+    lunch_df = agg_metrics(df.loc[(df.hour >= 11) & (df.hour < 17)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()
+    dinner_df = agg_metrics(df.loc[(df.hour >= 17) & (df.hour < 23)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()
+    late_night_df = agg_metrics(df.loc[(df.hour >= 23) | (df.hour < 5)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()
 
+    breakfast_wc = WordCloud().fit_words(breakfast_df['requested_orders'])
+    lunch_wc = WordCloud().fit_words(lunch_df['requested_orders'])
+    dinner_wc = WordCloud().fit_words(dinner_df['requested_orders'])
+    late_night_wc = WordCloud().fit_words(late_night_df['requested_orders'])
 
-
-
-st.header('Appendix')
-subfig = make_subplots(specs=[[{"secondary_y": True}]])
-fig1 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
-                        , x='dayofweek', y=['promo_order_rate', 'first_time_order_rate'])
-fig2 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
-                        , x='dayofweek', y=['requested_orders'])
-fig2.update_traces(yaxis="y2", line_color='red')
-subfig.add_traces(fig1.data + fig2.data)
-subfig.layout.xaxis.title = "Day of Week"
-subfig.layout.yaxis.title = "Rate"
-subfig.layout.yaxis2.title = "Orders"
-subfig.update_layout(title='Requested Orders relative to Promo Orders')
-st.plotly_chart(subfig)
-
-
+    st.image(breakfast_wc.to_array())
+    st.image(lunch_wc.to_array())
+    st.image(dinner_wc.to_array())
+    st.image(late_night_wc.to_array())

@@ -44,21 +44,12 @@ metrics = {
             'Returning Order Rate': 'returning_order_rate',
             '% of First Time On Promo': 'pct_first_time_promo',
             '% of Returning On Promo': 'pct_returning_promo',
-           # 'Revenue Per Prep Second': 'revenue_per_prep_min',
-           # '% Chg over Time Split': '%_chg',
+            'Acceptance Rate': 'acceptance_rate',
+            'Completion Rate': 'completion_rate',
+            'Promo ROI': 'promo_roi',
+            #'Revenue Per Prep Second': 'revenue_per_prep_min',
+            #'% Chg over Time Split': '%_chg',
            }
-
-extra_metrics = {
-
-    'Completion Rate': 'completion_rate',
-    'Acceptance Rate': 'acceptance_rate',
-}
-
-average_metrics = {
-    'Average Prep Time': 'avg_prep_time',
-    'Average Rating': 'avg_rating',
-}
-
 
 #metrics = dict(sum_metrics.items() + extra_metrics.items() + average_metrics.items())
 food_types = {
