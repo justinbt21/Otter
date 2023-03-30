@@ -46,7 +46,6 @@ metrics = {
             '% of Returning On Promo': 'pct_returning_promo',
             'Acceptance Rate': 'acceptance_rate',
             'Completion Rate': 'completion_rate',
-            'Promo ROI': 'promo_roi',
             #'Revenue Per Prep Second': 'revenue_per_prep_min',
             #'% Chg over Time Split': '%_chg',
            }
