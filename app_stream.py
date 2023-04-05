@@ -19,9 +19,16 @@ topn_input = st.sidebar.slider('Top Items Selector', min_value=0, max_value=50, 
 #min_rating = st.sidebar.radio('Min Rating (TEST)', pd.Series([0,1,2,3,4,5]), horizontal=True)
 #max_order_issue_rate = st.sidebar.slider('Max Order Issue Rate (TEST)', 0.0, 1.0, 1.0, .1)
 exclude_cuisine = st.sidebar.multiselect('Exclude specific cuisine tags', df['tags'].drop_duplicates())
+include_cuisine = st.sidebar.multiselect('Only include specific cuisine tags', df['tags'].drop_duplicates())
+dupe_cuisine = list(set(exclude_cuisine).intersection(include_cuisine))
+if len(dupe_cuisine) > 0:
+    st.sidebar.error(f"{dupe_cuisine} are in both exclude and include. Please remove them from one")
 
 # Data Tranformations
-df = df.loc[~df.tags.isin(exclude_cuisine)]
+if len(include_cuisine) > 0:
+    df = df.loc[(~df.tags.isin(exclude_cuisine)) & (df.tags.isin(include_cuisine))]
+else:
+    df = df.loc[~df.tags.isin(exclude_cuisine)]
 dates = (pd.to_datetime(df['date_str']).drop_duplicates())
 df.sort_values(by=['date', 'hour'], inplace=True)
 df.reset_index(drop=True, inplace=True)
@@ -111,6 +118,7 @@ if type_toggle == 'Cuisine Type':
 st.dataframe(fig_hr_df)
 
 with st.expander('Appendix'):
+    #Order Rate
     subfig = make_subplots(specs=[[{"secondary_y": True}]])
     fig1 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
                             , x='dayofweek', y=['promo_order_rate', 'first_time_order_rate'])
@@ -128,7 +136,7 @@ with st.expander('Appendix'):
     lunch_df = agg_metrics(df.loc[(df.hour >= 11) & (df.hour < 17)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()
     dinner_df = agg_metrics(df.loc[(df.hour >= 17) & (df.hour < 23)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()
     late_night_df = agg_metrics(df.loc[(df.hour >= 23) | (df.hour < 5)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()
-
+    # TIme of Day - Food Item Word Cloud
     breakfast_wc = WordCloud().fit_words(breakfast_df['requested_orders'])
     lunch_wc = WordCloud().fit_words(lunch_df['requested_orders'])
     dinner_wc = WordCloud().fit_words(dinner_df['requested_orders'])
@@ -138,3 +146,18 @@ with st.expander('Appendix'):
     st.image(lunch_wc.to_array())
     st.image(dinner_wc.to_array())
     st.image(late_night_wc.to_array())
+
+    breakfast_df = agg_metrics(df.loc[(df.hour >= 5) & (df.hour < 11)], 'tags')[['tags','requested_orders']].set_index('tags').to_dict()
+    lunch_df = agg_metrics(df.loc[(df.hour >= 11) & (df.hour < 17)], 'tags')[['tags','requested_orders']].set_index('tags').to_dict()
+    dinner_df = agg_metrics(df.loc[(df.hour >= 17) & (df.hour < 23)], 'tags')[['tags','requested_orders']].set_index('tags').to_dict()
+    late_night_df = agg_metrics(df.loc[(df.hour >= 23) | (df.hour < 5)], 'tags')[['tags','requested_orders']].set_index('tags').to_dict()
+    # Time of Day - Cuisine Word Cloud
+    breakfast_wc2 = WordCloud().fit_words(breakfast_df['requested_orders'])
+    lunch_wc2 = WordCloud().fit_words(lunch_df['requested_orders'])
+    dinner_wc2 = WordCloud().fit_words(dinner_df['requested_orders'])
+    late_night_wc2 = WordCloud().fit_words(late_night_df['requested_orders'])
+
+    st.image(breakfast_wc2.to_array())
+    st.image(lunch_wc2.to_array())
+    st.image(dinner_wc2.to_array())
+    st.image(late_night_wc2.to_array())
