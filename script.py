@@ -53,6 +53,8 @@ df['total_orders_promo'] = df['first_time_orders_promo'] + df['returning_orders_
 df['completion_rate'] = df['completed_orders'] / df['accepted_orders']
 df['acceptance_rate'] = df['accepted_orders'] / df['requested_orders']
 df['order_issue_rate'] = df['order_issues'] / df['completed_orders']
+df['first_time_orders_organic'] = df['first_time_orders'] - df['first_time_orders_promo']
+df['returning_orders_organic'] = df['returning_orders'] - df['returning_orders_promo']
 df['first_time_order_rate'] = df['first_time_orders'] / df['accepted_orders']
 df['returning_order_rate'] = df['returning_orders'] / df['accepted_orders']
 df['avg_prep_time_min'] = df['avg_prep_time'] / 60.0
@@ -89,11 +91,12 @@ cuisine_t={
     'indian': r'paneer|tikka|masala|indian|pakora|gobhi|samosa|naan|basmati|lassi|saag|biryani|makhni|vindaloo|tandoori|korma|butter chicken|dolma',
     'southern': r'fried chicken|gumbo|brisket|smoke|bbq|fried zucchini|bbq|coleslaw',
     'mediterranean': r'pita|tabouleh|fattoush|gyro|kebab|kabob|skewer|falafel|greek|kofta|shawarma|hummus|tzatziki',
-    'breakfast': r'orange juice|egg|breakfast|bagel|toast|bacon|omelette|croissant|hash brown|lox|waffle|pancake|sausage',
+    'breakfast': r'egg|breakfast|bagel|toast|bacon|omelette|hash brown|croissant|lox|waffle|pancake|sausage',
     'american': r'mac.*cheese|burger|\bwing[s]?\b|bacon|reuben|cheesesteak|tater tots|fries|buffalo|ranch|onion rings|grilled cheese|melt|nashville|slider|chili cheese|garlic knots|tender|nuggets|dog',
     'chinese': r'orange chicken|tofu|chinese|mein|dumplings|mongolian|potsticker|fried rice|general tsos|wontons|chow fun|szechuan|beef broccoli|kung pao|\b(beef broccoli)\b',
     'japanese': r'ramen|sushi|sashimi|nigiri|unagi|katsu|((?<!egg)(?<!spring)(?<!lobster)(?<!lamb)(?<!curry)(?<!cinnamon)\sroll)|gyoza|tempura|miso|edamame|udon|wasabi|karaage|teriyaki|\bsoba\b',
-    'latin': r'mexican|taco|burrito|guac|chorizo|al pastor|quesadilla|salsa|birria|horchata|carne asada|el verde|refried beans|tostada|nachos|churro|arepa|empanada|tortillas|jerk|caribbean',
+    'mexican': r'mexican|taco|burrito|guac|chorizo|al pastor|quesadilla|salsa|birria|horchata|carne asada|el verde|refried beans|tostada|nachos|churro|tortillas',
+    'latin': r'\barepa\b|empanada|jerk|caribbean',
     'thai': r'panang|pad thai|pad see ew|\bthai\b|drunken noodle|((red|yellow|green)\scurry)|tom kha|massaman|satay',
     'sandwiches': r'sandwich|blt|turkey club|roast beef',
     'soup': r'(soup)',
@@ -105,6 +108,7 @@ cuisine_t={
     'seafood': r'fish|lobster|crab|shrimp',
     'rice': r'rice bowl|white rice',
 }
+
 
 cuisine_list = list(cuisine_t.keys())
 for k,v in cuisine_t.items():

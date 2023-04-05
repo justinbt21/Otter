@@ -63,8 +63,8 @@ st.plotly_chart(px.bar(dow_df, x=food_types[type_toggle], y=metrics[metrics_togg
 if type_toggle == 'Cuisine Type':
     with st.expander('Click here to deep dive into cuisines'):
         cuisine_list = dow_df[food_types[type_toggle]].drop_duplicates()
-        cuisine_input = st.selectbox('Select a cuisine to see which food items are popular', options=cuisine_list)
-        mask = dow_df_prep['tags'].apply(lambda x: x == cuisine_input)
+        cuisine_input1 = st.selectbox('Select a cuisine to see which food items are popular', options=cuisine_list, key='cuisine1')
+        mask = dow_df_prep['tags'].apply(lambda x: x == cuisine_input1)
         st.dataframe(
             agg_metrics(dow_df_prep.loc[mask], 'item_type_new') \
                 .sort_values(by=metrics[metrics_toggle], ascending=False).reset_index(drop=True)
@@ -110,8 +110,8 @@ st.write(px.bar(fig_hr_df, x=food_types[type_toggle], y=metrics[metrics_toggle],
 if type_toggle == 'Cuisine Type':
     with st.expander('Click here to deep dive into cuisines'):
         cuisine_list = order_hour_df[food_types[type_toggle]].drop_duplicates()
-        cuisine_input = st.selectbox('Select a cuisine to see which food items are popular', options=cuisine_list)
-        mask = order_hour_prep['tags'].apply(lambda x: x == cuisine_input)
+        cuisine_input2 = st.selectbox('Select a cuisine to see which food items are popular', options=cuisine_list, key='cuisine2')
+        mask = order_hour_prep['tags'].apply(lambda x: x == cuisine_input2)
         st.dataframe(agg_metrics(order_hour_prep.loc[mask], 'item_type_new') \
                      .sort_values(by=metrics[metrics_toggle], ascending=False).reset_index(drop=True)
                      )
@@ -121,15 +121,45 @@ with st.expander('Appendix'):
     #Order Rate
     subfig = make_subplots(specs=[[{"secondary_y": True}]])
     fig1 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
-                            , x='dayofweek', y=['promo_order_rate', 'first_time_order_rate'])
+                            , x='dayofweek', y=['first_time_order_rate'])
     fig2 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
-                            , x='dayofweek', y=['requested_orders'])
-    fig2.update_traces(yaxis="y2", line_color='red')
+                            , x='dayofweek', y=['first_time_orders_organic','first_time_orders_promo'])
+    fig2.update_traces(yaxis="y2")
+    fig1.update_traces(line_color='red')
     subfig.add_traces(fig1.data + fig2.data)
     subfig.layout.xaxis.title = "Day of Week"
     subfig.layout.yaxis.title = "Rate"
     subfig.layout.yaxis2.title = "Orders"
-    subfig.update_layout(title='Requested Orders relative to Promo Orders')
+    subfig.update_layout(title='First Time Orders: Organic Vs Promo')
+    st.plotly_chart(subfig)
+
+    #Order Rate
+    subfig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig3 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
+                            , x='dayofweek', y=['promo_order_rate'])
+    fig4 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
+                            , x='dayofweek', y=['returning_orders_organic','returning_orders_promo','first_time_orders_organic','first_time_orders_promo'])
+    fig4.update_traces(yaxis="y2")
+    fig3.update_traces(line_color='green')
+    subfig.add_traces(fig3.data + fig4.data)
+    subfig.layout.xaxis.title = "Day of Week"
+    subfig.layout.yaxis.title = "Rate"
+    subfig.layout.yaxis2.title = "Orders"
+    subfig.update_layout(title='Promo Orders: Organic Vs Promo')
+    st.plotly_chart(subfig)
+
+    #Order Rate
+    subfig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig5 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
+                            , x='dayofweek', y=['promo_order_rate'])
+    fig6 = px.line(agg_metrics(df.loc[df[food_types[type_toggle]].isin(largest_cohorts)], ['dayofweek']).sort_values(by='dayofweek')
+                            , x='dayofweek', y=['requested_orders'])
+    fig6.update_traces(yaxis="y2", line_color='red')
+    subfig.add_traces(fig5.data + fig6.data)
+    subfig.layout.xaxis.title = "Day of Week"
+    subfig.layout.yaxis.title = "Rate"
+    subfig.layout.yaxis2.title = "Orders"
+    subfig.update_layout(title='Requested Orders Relative to Promo Order Rate')
     st.plotly_chart(subfig)
 
     breakfast_df = agg_metrics(df.loc[(df.hour >= 5) & (df.hour < 11)], 'item_type_new')[['item_type_new','requested_orders']].set_index('item_type_new').to_dict()

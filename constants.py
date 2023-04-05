@@ -30,8 +30,10 @@ metrics = {
             'Completed Orders': 'completed_orders',
             'First Time Orders': 'first_time_orders',
             'First Time Orders w/ Promo': 'first_time_orders_promo',
+            'First Time Orders w/o Promo': 'first_time_order_organic',
             'Returning Orders': 'returning_orders',
             'Returning Orders w/ Promo': 'returning_orders_promo',
+            'Returning Orders w/o Promo': 'returning_order_organic',
             'Promo Orders': 'total_orders_promo',
             'Order Issues': 'order_issues',
             'Eater Spend': 'total_eater_spend',
@@ -46,9 +48,13 @@ metrics = {
             '% of Returning On Promo': 'pct_returning_promo',
             'Acceptance Rate': 'acceptance_rate',
             'Completion Rate': 'completion_rate',
+            'Promo ROI': 'promo_roi',
             #'Revenue Per Prep Second': 'revenue_per_prep_min',
             #'% Chg over Time Split': '%_chg',
            }
+
+
+
 
 #metrics = dict(sum_metrics.items() + extra_metrics.items() + average_metrics.items())
 food_types = {

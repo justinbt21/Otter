@@ -41,11 +41,13 @@ def agg_metrics(df, groupby):
 
     new_df = df.groupby(groupby, as_index=False, group_keys=False).agg(constants.calc_metrics)
 
-    new_df['acceptance_rate'] = new_df['accepted_orders'] / new_df['requested_orders'] * 1.0
-    new_df['completion_rate'] = new_df['completed_orders'] / new_df['accepted_orders'] * 1.0
-    new_df['order_issue_rate'] = new_df['order_issues'] / new_df['completed_orders'] * 1.0
-    new_df['promo_order_rate'] = new_df['total_orders_promo'] / new_df['accepted_orders'] * 1.0
+    new_df['acceptance_rate'] = new_df['accepted_orders'] / new_df['requested_orders']
+    new_df['completion_rate'] = new_df['completed_orders'] / new_df['accepted_orders']
+    new_df['order_issue_rate'] = new_df['order_issues'] / new_df['completed_orders']
+    new_df['promo_order_rate'] = new_df['total_orders_promo'] / new_df['accepted_orders']
     new_df['first_time_order_rate'] = new_df['first_time_orders'] / new_df['accepted_orders']
+    new_df['first_time_orders_organic'] = new_df['first_time_orders'] - new_df['first_time_orders_promo']
+    new_df['returning_orders_organic'] = new_df['returning_orders'] - new_df['returning_orders_promo']
     new_df['returning_order_rate'] = new_df['returning_orders'] / new_df['accepted_orders']
     new_df['pct_first_time_promo'] = new_df['first_time_orders_promo'] / new_df['first_time_orders']
     new_df['pct_returning_promo'] = new_df['returning_orders_promo'] / new_df['returning_orders']
